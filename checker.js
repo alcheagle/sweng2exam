@@ -1,18 +1,27 @@
-
+const debug = require("debug")("checker.js");
 const fetch = require('node-fetch')
 
 function check(url, invocationParameters,  expectedResultData, expectedResultStatus) {
+	const checkResult = { // this is the object you need to set and return
+		urlChecked: url
+	}
 
-    const checkResult = { // this is the object you need to set and return
-        urlChecked: url,
-        resultData: null,
-        resultStatus: null,
-        statusTestPassed: null,
-        resultDataAsExpected: null
-    }
+	return fetch(
+			url,
+			{qs: invocationParameters})
+		.then((res) =>{
+		debug(res);
 
+		checkResult["resultStatus"] = res.status;
+		checkResult["statusTestPassed"] = expectedResultStatus? res.status == expectedResultStatus : true
+		return res.json();
+	}).then((json) => {
+		debug(json);
+		checkResult["resultData"] = json;
+		checkResult["resultDataAsExpected"] = compareResults(expectedResultData, json);
 
-
+		return checkResult;
+	});
 }
 
 
